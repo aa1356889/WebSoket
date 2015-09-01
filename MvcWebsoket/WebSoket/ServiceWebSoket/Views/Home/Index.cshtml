@@ -1,0 +1,59 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <script src="~/js/jquery-2.1.4.min.js"></script>
+    <title>Index</title>
+    <script type="text/javascript">
+        var ws;
+        $().ready(function () {
+            if (window.WebSocket) {
+                alert("aa");
+            }
+            $("#btnConnect").click(function () {
+                $("#spanStatus").text("connecting");
+                //向指定连接发送一个握手请求   这边给服务器发送握手请求 的请求报文 好像不对
+                ws = new WebSocket("ws://" + window.location.host + "/api/WSChat");
+                //连接成功触发
+                ws.onopen = function () {
+                    $("#spanStatus").text("connected");
+                };
+                //服务器端推送消息触发
+                ws.onmessage = function (evt) {
+                    $("#spanStatus").text(evt.data);
+                };
+                //出现错误时触发
+                ws.onerror = function (evt) {
+                    $("#spanStatus").text(evt.message);
+                };
+                //关闭连接触发 貌似
+                ws.onclose = function () {
+                    $("#spanStatus").text("disconnected");
+                };
+            });
+            $("#btnSend").click(function () {
+                if (ws.readyState == WebSocket.OPEN) {
+                    ws.send($("#textInput").val());
+                }
+                else {
+                    $("#spanStatus").text("Connection is closed");
+                }
+            });
+            $("#btnDisconnect").click(function () {
+                ws.close();
+            });
+        });
+    </script>
+</head>
+<body>
+    <input type="button" value="Connect" id="btnConnect" />
+    <input type="button" value="Disconnect" id="btnDisconnect" /><br />
+    <input type="text" id="textInput" />
+    <input type="button" value="Send" id="btnSend" /><br />
+    <span id="spanStatus">(display)</span>
+</body>
+</html>
